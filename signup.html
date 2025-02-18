@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="signup.css">
+    <script src="signup.js"></script>
+</head>
+<body>
+    <div id="main">
+        <div id="logo">
+            <img src="Assets/Logo.png" alt="">
+        </div>
+        <div id="moto">
+            <p>Create Your Account</p>
+        </div>
+        <div class="container">
+            <form id="signup-form">
+                <div class="form-section">
+                    <h3 class="section-title">Personal Information</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" id="name" class="form-input" required>
+                            <div class="error-message">Please enter your full name</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" class="form-input" required>
+                            <div class="error-message">Please enter a valid phone number</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Account Credentials</h3>
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" class="form-input" required>
+                        <div class="input-hint">3-30 characters, letters, numbers, and underscores only</div>
+                        <div class="error-message">Please choose a valid username</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" class="form-input" required>
+                        <div class="error-message">Please enter a valid email address</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" class="form-input" required>
+                        <div class="input-hint">At least 8 characters with letters, numbers, and symbols</div>
+                        <div class="error-message">Password must meet the requirements</div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Store Information</h3>
+                    <div class="form-group">
+                        <label for="store-name" class="form-label">Store Name</label>
+                        <input type="text" id="store-name" class="form-input" required>
+                        <div class="error-message">Please enter your store name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="store-address" class="form-label">Store Address</label>
+                        <textarea id="store-address" class="form-input" rows="3" required></textarea>
+                        <div class="error-message">Please enter your store address</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="signup-button">Create Account</button>
+            </form>
+
+            <div class="signin-prompt">
+                Already have an account? <a href="signin.html" class="signin-link" id="signin-link">Sign In</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,231 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.center1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.center2 {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+#main {
+    margin: auto;
+    width: 425px;
+    height: 100vh;
+    background: linear-gradient(aliceblue, white);
+}
+
+#logo {
+    padding-top: 10%;
+    margin: auto;
+    width: 250px;
+}
+
+#logo img {
+    width: 250px;
+}
+
+#moto {
+    margin: auto;
+    width: 100%;
+    padding: 20px 0px;
+}
+
+#moto p {
+    
+    color: rgb(92, 124, 152);
+    text-align: center;
+    width: max-content;
+    font-size: x-large;
+    width: 100%;
+}
+
+/* Camera */
+.section {
+    padding: 30px;
+}
+
+#my-qr-reader {
+    background-color: white;
+    padding: 20px !important;
+    padding-bottom: 0 !important;
+    border: 1.5px solid #6e929e !important;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(51, 102, 255, 0.1);
+}
+
+#my-qr-reader img[alt="Info icon"] {
+    display: none;
+}
+
+#my-qr-reader img[alt="Camera based scan"] {
+    width: 100px !important;
+    height: 100px !important;
+}
+
+button {
+    font-size: 20px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    background: #2b64dd;
+    min-width: 200px;
+    max-width: max-content;
+    padding: 12.5px 20px;
+    border-radius: 25px;
+    margin: 15px auto;
+    color: rgb(243, 249, 255);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    border: none;
+}
+
+button:hover {
+    background-color: #2952cc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(51, 102, 255, 0.2);
+}
+
+button:active {
+    transform: click 0.3s ease;
+    box-shadow: 0 2px 6px rgba(51, 102, 255, 0.2);
+}
+
+@keyframes click {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+#html5-qrcode-anchor-scan-type-change {
+    text-decoration: none !important;
+    color: #2b64dd;
+    margin-bottom: 10px;
+}
+
+video {
+    width: 100% !important;
+    border: 1px solid #b2b2b2 !important;
+    border-radius: 5px;
+}
+
+span {
+    color: rgb(92, 124, 152);
+    text-align: center;
+    width: max-content;
+    font-size: large;
+    width: 100%;
+}
+
+#html5-qrcode-select-camera{
+    color: rgb(92, 124, 152);
+    text-align: center;
+    width: max-content;
+    font-size: 15px;
+    width: 80%;
+    height: 30px;
+    margin: auto;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #6e929e;
+}
+
+#signin-using-username, #signin-using-qr{
+    margin:40px auto;
+}
+
+.container {
+    margin: 30px;
+    background-color: white;
+    /* padding: 20px; */
+    border: 1.5px solid #6e929e;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(51, 102, 255, 0.1);
+}
+
+#signin-form{
+    margin: 20px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.form-input {
+    width: 90%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3366ff;
+    box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.1);
+}
+
+.signup-prompt {
+    text-align: center;
+    margin: 1.5rem;
+    color: #4a5568;
+}
+
+.signup-link {
+    color: #3366ff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.signup-link:hover {
+    color: #2952cc;
+}
+
+.form-input.error {
+    border-color: #ff4d4d;
+}
+
+.error-message {
+    color: #ff4d4d;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
