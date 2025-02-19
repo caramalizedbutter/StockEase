@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="dashboard.js"></script>
+    <title>Document</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="logo">
+            <img src="Assets/Logo.png" alt="">
+        </div>
+        <div class="container" id="dashboard">
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Search products...">
+            </div>
+
+            <div class="tabs">
+                <button class="tab red" id="low">
+                    <div class="count-circle" style="background: #ff6b81">12</div>
+                    Low Stock
+                </button>
+                <button class="tab yellow" id="running">
+                    <div class="count-circle" style="background: #ffbe76">8</div>
+                    Running Low
+                </button>
+                <button class="tab green" id="available">
+                    <div class="count-circle" style="background: #7bed9f">45</div>
+                    Available
+                </button>
+            </div>
+
+            <div id="stockList" class="stock-list">
+                <!-- Stock items will be populated here -->
+            </div>
+        </div>
+
+        <div class="container" id="billing">
+            <input type="text" class="search-bar" id="scan-input" placeholder="Enter product code manually..."
+                autofocus>
+            <div class="section">
+                <div id="my-qr-reader"></div>
+            </div>
+            <div class="product-list" id="productList">
+                <!-- Products will be added here -->
+
+            </div>
+            <div class="cart-summary">
+                <h2 class="summary-header">Cart Summary</h2>
+                <div class="total-items" id="itemCount">0 items</div>
+                <div class="total">
+                    <span>Total</span>
+                    <span id="total">₹0.00</span>
+                </div>
+                <button class="checkout-btn" id="checkout-btn">Checkout</button>
+            </div>
+        </div>
+        <div class="container" id="add-stock"></div>
+
+        <div class="container" id="inventory"></div>
+        
+        <div class="container" id="profile"></div>
+
+
+        <nav class="bottom-nav">
+            <a id="dashboard-icon" class="nav-item active">
+                <div class="nav-icon">
+                    📊
+                    <span class="notification"></span>
+                </div>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a id="billing-icon" class="nav-item">
+                <div class="nav-icon">
+                    🛒
+                    <span class="notification"></span>
+                </div>
+                <span class="nav-label">Billing</span>
+            </a>
+            <a id="add-stock-icon" class="nav-item">
+                <div class="nav-icon">
+                    📦
+                    <span class="notification"></span>
+                </div>
+                <span class="nav-label">Add Stock</span>
+            </a>
+            <a id="inventory-icon" class="nav-item has-notification">
+                <div class="nav-icon">
+                    📝
+                    <span class="notification"></span>
+                </div>
+                <span class="nav-label">Inventory</span>
+            </a>
+            <a id="profile-icon" class="nav-item">
+                <div class="nav-icon">
+                    👤
+                    <span class="notification"></span>
+                </div>
+                <span class="nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
+    <script>
+        
+    </script>
+</body>
+
+</html>
