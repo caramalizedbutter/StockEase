@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const API_BASE_URL = "https://stockease-1.onrender.com";
+    let authToken = localStorage.getItem('token') || '';
+    
     // Initialize empty cart if not exists
     if (!localStorage.getItem('cart')) {
         localStorage.setItem('cart', JSON.stringify([]));
@@ -26,8 +29,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    function getStockData() {
-        const items = JSON.parse(localStorage.getItem('inventoryItems') || '[]');
+    async function getStockData() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/inventory`, {
+                headers: {
+                    'Authorization': authToken,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch inventory');
+            const items = await response.json();
         const stockData = {
             low: [],
             running: [],
@@ -35,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
             all: items
         };
 
-        items.forEach(item => {
+            items.forEach(item => {
             if (item.quantity <= 5) {
                 stockData.low.push({
                     name: item.productName,
@@ -57,7 +68,12 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-        return stockData;
+            return stockData;
+        } catch (error) {
+            console.error('Error fetching inventory:', error);
+            alert('Failed to load inventory data');
+            return { low: [], running: [], available: [], all: [] };
+        }
     }
 
     function getStatusClass(status) {
@@ -164,69 +180,109 @@ scanInput.addEventListener('keypress', function (e) {
     }
 });
 
-function handleBillingScan(barcode) {
-    const inventoryItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-    const product = inventoryItems.find(item => item.barcode === barcode);
-
-    if (product) {
-        if (product.quantity > 0) {
-            addToCart(barcode);
-        } else {
-            alert('Product out of stock!');
-        }
-    } else {
-        alert('Product not found!');
-    }
-}
-
-function addToCart(barcode) {
-    const inventoryItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-    const product = inventoryItems.find(item => item.barcode === barcode);
-    
-    if (!product) return;
-
-    const existingCartItem = cart.find(item => item.barcode === barcode);
-
-    if (existingCartItem) {
-        if (existingCartItem.quantity < product.quantity) {
-            existingCartItem.quantity++;
-            decreaseInventoryQuantity(barcode);
-        } else {
-            alert('Cannot add more items than available in stock!');
-        }
-    } else {
-        cart.push({
-            barcode,
-            name: product.productName,
-            price: product.price,
-            quantity: 1
+async function handleBillingScan(barcode) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/inventory`, {
+            headers: {
+                'Authorization': authToken,
+                'Content-Type': 'application/json'
+            }
         });
-        decreaseInventoryQuantity(barcode);
+        if (!response.ok) throw new Error('Failed to fetch inventory');
+        
+        const items = await response.json();
+        const product = items.find(item => item.barcode === barcode);
+
+        if (product) {
+            if (product.quantity > 0) {
+                addToCart(barcode);
+            } else {
+                alert('Product out of stock!');
+            }
+        } else {
+            alert('Product not found!');
+        }
+    } catch (error) {
+        console.error('Error handling barcode scan:', error);
+        alert('Failed to process barcode scan');
     }
-
-    updateDisplay();
 }
 
-function decreaseInventoryQuantity(barcode) {
-    const inventoryItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-    const updatedItems = inventoryItems.map(item => {
-        if (item.barcode === barcode) {
-            return { ...item, quantity: item.quantity - 1 };
+async function addToCart(barcode) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/inventory`, {
+            headers: {
+                'Authorization': authToken,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) throw new Error('Failed to fetch inventory');
+        
+        const items = await response.json();
+        const product = items.find(item => item.barcode === barcode);
+        
+        if (!product) {
+            alert('Product not found!');
+            return;
         }
-        return item;
-    });
-    localStorage.setItem('inventoryItems', JSON.stringify(updatedItems));
+
+        const existingCartItem = cart.find(item => item.barcode === barcode);
+
+        if (existingCartItem) {
+            if (existingCartItem.quantity < product.quantity) {
+                existingCartItem.quantity++;
+                await decreaseInventoryQuantity(barcode);
+            } else {
+                alert('Cannot add more items than available in stock!');
+            }
+        } else {
+            cart.push({
+                barcode,
+                name: product.productName,
+                price: product.price,
+                quantity: 1
+            });
+            await decreaseInventoryQuantity(barcode);
+        }
+
+        updateDisplay();
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        alert('Failed to add item to cart');
+    }
 }
 
-function increaseInventoryQuantity(barcode, amount = 1) {
-    const inventoryItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-    const updatedItems = inventoryItems.map(item => {
-        if (item.barcode === barcode) {
-            return { ...item, quantity: item.quantity + amount };
-        }
-        return item;
-    });
-    localStorage.setItem('inventoryItems', JSON.stringify(updatedItems));
+async function decreaseInventoryQuantity(barcode) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/inventory/${barcode}/decrease`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': authToken,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) throw new Error('Failed to decrease inventory quantity');
+    } catch (error) {
+        console.error('Error decreasing inventory quantity:', error);
+        throw error;
+    }
+}
+
+async function increaseInventoryQuantity(barcode, amount = 1) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/inventory/${barcode}/increase`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': authToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount })
+        });
+        if (!response.ok) throw new Error('Failed to increase inventory quantity');
+    } catch (error) {
+        console.error('Error increasing inventory quantity:', error);
+        throw error;
+    }
 }
 
 function updateDisplay() {
@@ -266,28 +322,40 @@ function updateDisplay() {
     updateSummary();
 }
 
-function decreaseQuantity(index) {
+async function decreaseQuantity(index) {
     const item = cart[index];
     if (item.quantity > 1) {
         item.quantity--;
-        increaseInventoryQuantity(item.barcode);
+        await increaseInventoryQuantity(item.barcode);
         updateDisplay();
     } else {
         removeItem(index);
     }
 }
 
-function increaseQuantity(index) {
+async function increaseQuantity(index) {
     const item = cart[index];
-    const inventoryItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-    const inventoryItem = inventoryItems.find(invItem => invItem.barcode === item.barcode);
-
-    if (inventoryItem && inventoryItem.quantity > 0) {
-        item.quantity++;
-        decreaseInventoryQuantity(item.barcode);
-        updateDisplay();
-    } else {
-        alert('No more stock available!');
+    try {
+        const response = await fetch(`${API_BASE_URL}/inventory/${item.barcode}`, {
+            headers: {
+                'Authorization': authToken,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) throw new Error('Failed to fetch product');
+        
+        const product = await response.json();
+        
+        if (product && product.quantity > 0) {
+            item.quantity++;
+            await decreaseInventoryQuantity(item.barcode);
+            updateDisplay();
+        } else {
+            alert('No more stock available!');
+        }
+    } catch (error) {
+        console.error('Error increasing quantity:', error);
+        alert('Failed to increase quantity');
     }
 }
 
