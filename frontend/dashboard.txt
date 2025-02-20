@@ -1,0 +1,327 @@
+document.addEventListener("DOMContentLoaded", function () {
+    // Initialize empty cart if not exists
+    if (!localStorage.getItem('cart')) {
+        localStorage.setItem('cart', JSON.stringify([]));
+    }
+
+    // Navigation ripple effect
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+            
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    function getStockData() {
+        const items = JSON.parse(localStorage.getItem('inventoryItems') || '[]');
+        const stockData = {
+            low: [],
+            running: [],
+            available: [],
+            all: items
+        };
+
+        items.forEach(item => {
+            if (item.quantity <= 5) {
+                stockData.low.push({
+                    name: item.productName,
+                    quantity: item.quantity,
+                    status: 'low'
+                });
+            } else if (item.quantity <= 20) {
+                stockData.running.push({
+                    name: item.productName,
+                    quantity: item.quantity,
+                    status: 'running'
+                });
+            } else {
+                stockData.available.push({
+                    name: item.productName,
+                    quantity: item.quantity,
+                    status: 'available'
+                });
+            }
+        });
+
+        return stockData;
+    }
+
+    function getStatusClass(status) {
+        switch(status) {
+            case 'low': return 'status-low';
+            case 'running': return 'status-running';
+            case 'available': return 'status-available';
+            default: return '';
+        }
+    }
+
+    function showStock(type) {
+        const stockData = getStockData();
+        const stockList = document.getElementById('stockList');
+        stockList.classList.remove('visible');
+        
+        setTimeout(() => {
+            stockList.innerHTML = stockData[type]
+                .map(item => `
+                    <div class="stock-item">
+                        <span class="span">
+                            <span class="status-indicator ${getStatusClass(item.status)}"></span>
+                            ${item.name}
+                        </span>
+                        <span class="quantity-badge">${item.quantity} units</span>
+                    </div>
+                `).join('');
+            
+            stockList.classList.add('visible');
+        }, 300);
+    }
+
+    // Initialize with all products
+    showStock('all');
+
+    // Event listeners for stock filters
+    document.getElementById('low').addEventListener('click', () => showStock('low'));
+    document.getElementById('running').addEventListener('click', () => showStock('running'));
+    document.getElementById('available').addEventListener('click', () => showStock('available'));
+
+    // Search functionality
+    const searchBar = document.querySelector('.search-bar');
+    searchBar.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const stockData = getStockData();
+        const filteredItems = stockData.all.filter(item => 
+            item.name.toLowerCase().includes(searchTerm)
+        );
+
+        const stockList = document.getElementById('stockList');
+        stockList.classList.remove('visible');
+        
+        setTimeout(() => {
+            stockList.innerHTML = filteredItems
+                .map(item => `
+                    <div class="stock-item">
+                        <span class="span">
+                            <span class="status-indicator ${getStatusClass(item.status)}"></span>
+                            ${item.name}
+                        </span>
+                        <span class="quantity-badge">${item.quantity} units</span>
+                    </div>
+                `).join('');
+            
+            stockList.classList.add('visible');
+        }, 300);
+    });
+
+    let scanCooldown = false;
+    let lastScannedCode = null;
+    const COOLDOWN_DURATION = 2000;
+
+    document.getElementById('checkout-btn').addEventListener('click', () => checkout());
+
+    function handleScan(barcode) {
+        const items = JSON.parse(localStorage.getItem('inventoryItems') || '[]');
+        const product = items.find(item => item.barcode === barcode);
+        
+        if (product) {
+            addToCart(product);
+        } else {
+            alert('Product not found!');
+        }
+    }
+
+    function addToCart(product) {
+        const cart = JSON.parse(localStorage.getItem('cart'));
+        const existingItem = cart.find(item => item.barcode === product.barcode);
+
+        if (existingItem) {
+            if (existingItem.quantity < product.quantity) {
+                existingItem.quantity++;
+            } else {
+                alert('Not enough stock available!');
+                return;
+            }
+        } else {
+            cart.push({
+                barcode: product.barcode,
+                name: product.productName,
+                price: product.price,
+                quantity: 1,
+                maxQuantity: product.quantity
+            });
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateDisplay();
+    }
+
+    function updateQuantity(index, change) {
+        const cart = JSON.parse(localStorage.getItem('cart'));
+        const items = JSON.parse(localStorage.getItem('inventoryItems'));
+        const product = items.find(item => item.barcode === cart[index].barcode);
+
+        if (change > 0 && cart[index].quantity >= product.quantity) {
+            alert('Not enough stock available!');
+            return;
+        }
+
+        cart[index].quantity += change;
+        if (cart[index].quantity < 1) {
+            cart.splice(index, 1);
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        const cart = JSON.parse(localStorage.getItem('cart'));
+        const productList = document.getElementById('productList');
+        productList.innerHTML = cart.map((item, index) => `
+            <div class="stock-item2">
+                <div class="stock-flex">
+                    <span>${item.name}</span>
+                    <span>₹${item.price.toFixed(2)}</span>
+                </div>
+                <div class="stock-flex2">
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                        <span class="quantity-display">${item.quantity}</span>
+                        <button class="quantity-btn" id="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                    </div>
+                    <button class="quantity-btn remove-btn" onclick="updateQuantity(${index}, -${item.quantity})">×</button>
+                </div>
+            </div>
+        `).join('');
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const cart = JSON.parse(localStorage.getItem('cart'));
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        document.getElementById('total').textContent = `₹${total.toFixed(2)}`;
+        document.getElementById('itemCount').textContent = `${itemCount} item${itemCount !== 1 ? 's' : ''}`;
+    }
+
+    function checkout() {
+        const cart = JSON.parse(localStorage.getItem('cart'));
+        if (cart.length === 0) {
+            alert('Cart is empty!');
+            return;
+        }
+
+        // Update inventory quantities
+        const items = JSON.parse(localStorage.getItem('inventoryItems'));
+        cart.forEach(cartItem => {
+            const itemIndex = items.findIndex(item => item.barcode === cartItem.barcode);
+            if (itemIndex !== -1) {
+                items[itemIndex].quantity -= cartItem.quantity;
+            }
+        });
+
+        localStorage.setItem('inventoryItems', JSON.stringify(items));
+        localStorage.setItem('cart', JSON.stringify([]));
+        alert('Order placed successfully!');
+        updateDisplay();
+        showStock('all');
+    }
+
+    // Section navigation
+    const sections = ["dashboard", "billing", "add-stock", "inventory", "profile"];
+    const icons = ["dashboard-icon", "billing-icon", "add-stock-icon", "inventory-icon", "profile-icon"];
+
+    icons.forEach((icon, index) => {
+        document.getElementById(icon).addEventListener("click", function () {
+            sections.forEach(section => {
+                document.getElementById(section).style.display = "none";
+            });
+
+            let stopBtn = document.querySelectorAll('#html5-qrcode-button-camera-stop');
+            stopBtn.forEach(btn => btn.click());
+
+            document.getElementById(sections[index]).style.display = "block";
+        });
+    });
+    function domReady(fn) {
+        if (
+            document.readyState === "complete" ||
+            document.readyState === "interactive"
+        ) {
+            setTimeout(fn, 1000);
+        } else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+
+    // Initialize empty cart if not exists
+    if (!localStorage.getItem('cart')) {
+        localStorage.setItem('cart', JSON.stringify([]));
+    }
+    
+    window.updateQuantity = function(index, change) {
+        const cart = JSON.parse(localStorage.getItem('cart'));
+        const items = JSON.parse(localStorage.getItem('inventoryItems'));
+        const product = items.find(item => item.barcode === cart[index].barcode);
+
+        if (change > 0 && cart[index].quantity >= product.quantity) {
+            alert('Not enough stock available!');
+            return;
+        }
+
+        cart[index].quantity += change;
+        if (cart[index].quantity < 1) {
+            cart.splice(index, 1);
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateDisplay();
+    }
+    
+        // Initialize QR code scanner
+        domReady(function () {
+            let htmlscanner = new Html5QrcodeScanner(
+                "my-qr-reader",
+                { fps: 10, qrbox: 250 }
+            );
+            htmlscanner.render(function(decodeText, decodeResult) {
+                if (scanCooldown || decodeText === lastScannedCode) {
+                    return;
+                }
+                scanCooldown = true;
+                lastScannedCode = decodeText;
+                handleScan(decodeText);
+                setTimeout(() => {
+                    scanCooldown = false;
+                    lastScannedCode = null;
+                }, COOLDOWN_DURATION);
+            });
+        });
+    
+    // Manual barcode input
+    const scanInput = document.getElementById('scan-input');
+    scanInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            handleScan(this.value);
+            this.value = '';
+        }
+    });
+
+    // Set default section
+    document.getElementById("dashboard").style.display = "block";
+});

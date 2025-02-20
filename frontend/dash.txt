@@ -1,0 +1,142 @@
+    scanCooldown = false;
+        lastScannedCode = null;
+
+        function handleScan(decodeText) {
+            const items = JSON.parse(localStorage.getItem('inventoryItems') || '[]');
+            const existingProduct = items.find(item => item.barcode === decodeText);
+
+            document.getElementById('barcodeInput').value = decodeText;
+
+            if (existingProduct) {
+                document.getElementById('productName').value = existingProduct.productName;
+                document.getElementById('productName').readOnly = true;
+                document.getElementById('price').value = existingProduct.price;
+                document.getElementById('price').readOnly = true;
+                document.getElementById('expiryDate').value = existingProduct.expiryDate;
+                document.getElementById('quantity').value = '';
+                showNotification('Product found! Update the quantity.', 'info');
+            } else {
+                document.getElementById('productName').value = '';
+                document.getElementById('productName').readOnly = false;
+                document.getElementById('price').value = '';
+                document.getElementById('price').readOnly = false;
+                document.getElementById('expiryDate').value = '';
+                document.getElementById('quantity').value = '';
+            }
+            
+            document.getElementById(existingProduct ? 'quantity' : 'productName').focus();
+        }
+
+        function updateItemsList() {
+            const items = JSON.parse(localStorage.getItem('inventoryItems') || '[]');
+            const itemsList = document.getElementById('itemsList');
+            itemsList.innerHTML = '';
+            
+            items.forEach(item => {
+                const listItem = document.createElement('div');
+                listItem.className = 'product-item2';
+                
+                const expiryDate = new Date(item.expiryDate);
+                const formattedDate = expiryDate.toLocaleDateString();
+                
+                listItem.innerHTML = `
+                    <div>
+                        <h3>${item.productName}</h3>
+                        <p>Barcode: ${item.barcode}</p>
+                        <p>Quantity: ${item.quantity}</p>
+                        <p>Price: ₹${parseFloat(item.price).toFixed(2)}</p>
+                        <p>Expiry Date: ${formattedDate}</p>
+                    </div>
+                `;
+                
+                itemsList.appendChild(listItem);
+            });
+        }
+
+        // Add event listeners for the new buttons
+        document.getElementById('clearDisplay').addEventListener('click', function() {
+            document.getElementById('itemsList').innerHTML = '';
+        });
+
+        document.getElementById('showItems').addEventListener('click', function() {
+            updateItemsList();
+        });
+
+        function domReady(fn) {
+            if (
+                document.readyState === "complete" ||
+                document.readyState === "interactive"
+            ) {
+                setTimeout(fn, 1000);
+            } else {
+                document.addEventListener("DOMContentLoaded", fn);
+            }
+        }
+
+        domReady(function () {
+            const html5QrcodeScanner = new Html5QrcodeScanner(
+                "my-qr-reader2",
+                { fps: 10, qrbox: 250 }
+            );
+
+            function onScanSuccess(decodeText, decodeResult) {
+                if (scanCooldown || decodeText === lastScannedCode) {
+                    return;
+                }
+
+                scanCooldown = true;
+                lastScannedCode = decodeText;
+
+                handleScan(decodeText);
+
+                setTimeout(() => {
+                    scanCooldown = false;
+                    lastScannedCode = null;
+                }, COOLDOWN_DURATION);
+            }
+
+            html5QrcodeScanner.render(onScanSuccess, (error) => {
+                console.warn(`Code scan error = ${error}`);
+            });
+
+            updateItemsList();
+        });
+
+        document.getElementById('stockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const barcode = document.getElementById('barcodeInput').value;
+            const productName = document.getElementById('productName').value;
+            const newQuantity = parseInt(document.getElementById('quantity').value);
+            const price = parseFloat(document.getElementById('price').value);
+            const expiryDate = document.getElementById('expiryDate').value;
+            
+            if (!barcode || !productName || !newQuantity || !price || !expiryDate) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            const items = JSON.parse(localStorage.getItem('inventoryItems') || '[]');
+            const existingProductIndex = items.findIndex(item => item.barcode === barcode);
+
+            if (existingProductIndex !== -1) {
+                items[existingProductIndex].quantity = 
+                    parseInt(items[existingProductIndex].quantity) + newQuantity;
+            } else {
+                items.unshift({
+                    barcode,
+                    productName,
+                    quantity: newQuantity,
+                    price,
+                    expiryDate,
+                    timestamp: Date.now()
+                });
+            }
+
+            localStorage.setItem('inventoryItems', JSON.stringify(items));
+            updateItemsList();
+            
+            document.getElementById('stockForm').reset();
+            document.getElementById('productName').readOnly = false;
+            document.getElementById('price').readOnly = false;
+        });

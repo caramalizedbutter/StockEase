@@ -212,6 +212,7 @@
     padding: 20px;
     margin: 0 auto;
     display: none;
+    margin-bottom: 60px;
 }
 
 .container:nth-child(1){
@@ -278,7 +279,6 @@
 
 .stock-list {
     margin-top: 20px;
-    margin-bottom: 60px;
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.4s ease;
@@ -346,6 +346,18 @@
     font-weight: 500;
 }
 
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  .status-low { background-color: #ff4757; }
+  .status-running { background-color: #ffa502; }
+  .status-available { background-color: #2ed573; }
+
 .span{
     padding: 5px 0;
 }
@@ -390,7 +402,7 @@
     border-width: 0 !important;
 }
 
-#my-qr-reader {
+.qr-scanner {
     background-color: white;
     padding: 20px !important;
     padding-bottom: 0 !important;
@@ -399,16 +411,16 @@
     box-shadow: 0 4px 20px rgba(51, 102, 255, 0.1);
 }
 
-#my-qr-reader img[alt="Info icon"] {
+.qr-scanner img[alt="Info icon"] {
     display: none;
 }
 
-#my-qr-reader img[alt="Camera based scan"] {
+.qr-scanner img[alt="Camera based scan"] {
     width: 100px !important;
     height: 100px !important;
 }
 
-#checkout-btn, #my-qr-reader__dashboard_section_csr button {
+#checkout-btn, .qr-scanner button, .add-button, .button-container button {
     font-size: 20px;
     text-align: center;
     text-decoration: none;
@@ -426,26 +438,26 @@
     margin-bottom: 0px;
 }
 
-#checkout-btn:hover, #my-qr-reader__dashboard_section_csr button:hover {
+#checkout-btn:hover, .qr-scanner button:hover, .add-button:hover, .button-container button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(51, 102, 255, 0.2);
     background: #26af5f;
 }
 
-#checkout-btn:active, #my-qr-reader__dashboard_section_csr button:active {
+#checkout-btn:active, .qr-scanner button:active , .add-button:active, .button-container button:active {
     transform: click 0.3s ease;
     box-shadow: 0 2px 6px rgba(51, 102, 255, 0.2);
 }
 
-#my-qr-reader__dashboard_section_csr button{
+.qr-scanner button, .add-button{
     background: #2b64dd;
     margin: 15px auto;
 }
 
-#my-qr-reader__dashboard_section_csr button:hover{
-background: #2952cc;
-
+.qr-scanner button:hover, .add-button:hover{
+    background: #2952cc;
 }
+
 @keyframes click {
     0% {
         transform: translateY(0);
@@ -460,7 +472,7 @@ background: #2952cc;
     }
 }
 
-#html5-qrcode-anchor-scan-type-change {
+.qr-scanner #html5-qrcode-anchor-scan-type-change {
     text-decoration: none !important;
     color: #2b64dd;
     margin-bottom: 10px;
@@ -564,7 +576,6 @@ video {
     padding: 24px;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 60px;
 }
 
 .summary-header {
@@ -586,3 +597,33 @@ video {
     align-items: center;
 }
 
+#clearDisplay{
+    background: #ff4757;
+}
+
+#clearDisplay:hover {
+    background: #e74c3c;
+}
+
+#clearDisplay:active {
+    background: #c0392b;
+}
+
+.button-container{
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.button-container button{
+    min-width: 180px;
+}
+#itemList{
+    margin-bottom: 60px !important;
+}
+.product-item2 {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    animation: slideIn 0.3s ease;
+}
