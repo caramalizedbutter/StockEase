@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     domReady(function () {
         function onScanSuccess(decodeText, decodeResult) {
-            alert("You Qr is : " + decodeText, decodeResult);
+            alert("Your QR is: " + decodeText);
         }
 
         let htmlscanner = new Html5QrcodeScanner(
@@ -30,80 +30,99 @@ document.addEventListener("DOMContentLoaded", function () {
             stopButton.click();
         }
     });
+
     document.getElementById("signin-using-qr").addEventListener("click", function () {
         document.getElementById("qr").style.display = "block";
         document.getElementById("user").style.display = "none";
-
     });
-    document.getElementById('signin-form').addEventListener('submit', function(e) {
+
+    //  Single event listener for the form
+    document.getElementById('signin-form').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        const identifier = document.getElementById('identifier');
-        const password = document.getElementById('password');
+
+        const identifier = document.getElementById('identifier').value;
+        const password = document.getElementById('password').value;
         const button = document.querySelector('.signin-button');
-        
+
         // Reset previous errors
         resetErrors();
-        
+
         // Validate identifier (username or email)
-        if (!isValidIdentifier(identifier.value)) {
-            showError(identifier, 'Please enter a valid username or email address');
+        if (!isValidIdentifier(identifier)) {
+            showError(document.getElementById('identifier'), 'Please enter a valid username or email address');
             return;
         }
-        
+
         // Validate password
-        if (password.value.length < 8) {
-            showError(password, 'Password must be at least 8 characters');
+        if (password.length < 8) {
+            showError(document.getElementById('password'), 'Password must be at least 8 characters');
             return;
+        }
+
+        // Disable button to prevent multiple clicks
+        button.disabled = true;
+        button.textContent = "Signing in...";
+
+        try {
+            const response = await fetch('https://stockease-1.onrender.com', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: identifier, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Login failed');
+            }
+
+            // Store token in local storage (optional)
+            localStorage.setItem('token', data.token);
+
+            // Redirect to dashboard or homepage
+            window.location.href = '/dashboard.html';
+        } catch (error) {
+            showError(document.getElementById('identifier'), error.message);
+        } finally {
+            button.disabled = false;
+            button.textContent = "Sign In";
         }
     });
 
     function isValidIdentifier(identifier) {
-        // Check if it's a valid email
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        // Check if it's a valid username (alphanumeric, underscore, hyphen, 3-30 chars)
         const usernamePattern = /^[a-zA-Z0-9_-]{3,30}$/;
-        
         return emailPattern.test(identifier) || usernamePattern.test(identifier);
     }
 
     function showError(input, message) {
         input.classList.add('error');
-
-        // Find the nearest error message div inside the same form-group
         const errorElement = input.parentElement.querySelector('.error-message');
-
         if (errorElement) {
             errorElement.textContent = message;
-            errorElement.style.display = 'block'; // Make it visible
+            errorElement.style.display = 'block';
         }
-
-        // Add a shake effect for better UX
         input.parentElement.classList.add('shake');
         setTimeout(() => {
             input.parentElement.classList.remove('shake');
         }, 500);
-        }
+    }
 
-        function resetErrors() {
+    function resetErrors() {
         document.querySelectorAll('.form-input').forEach(input => {
             input.classList.remove('error');
-        
-            // Find the nearest error message div inside the same form-group
             const errorElement = input.parentElement.querySelector('.error-message');
-        
             if (errorElement) {
-                errorElement.style.display = 'none'; // Hide error messages
+                errorElement.style.display = 'none';
             }
         });
     }
 
-    // Add focus effects for inputs
     document.querySelectorAll('.form-input').forEach(input => {
         input.addEventListener('focus', function() {
             this.parentElement.classList.add('focused');
         });
-        
+
         input.addEventListener('blur', function() {
             this.parentElement.classList.remove('focused');
         });
