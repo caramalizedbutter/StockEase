@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('signin-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const identifier = document.getElementById('identifier').value;
-        const password = document.getElementById('password').value;
+        const identifier = document.getElementById('identifier').value.trim();
+        const password = document.getElementById('password').value.trim();
         const button = document.querySelector('.signin-button');
 
         // Reset previous errors
@@ -59,15 +59,21 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Determine whether identifier is email or username
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+        const loginData = isEmail 
+            ? { email: identifier, password } 
+            : { username: identifier, password };
+
         // Disable button to prevent multiple clicks
         button.disabled = true;
         button.textContent = "Signing in...";
 
         try {
-            const response = await fetch('https://stockease-1.onrender.com', {
+            const response = await fetch('https://stockease-1.onrender.com/api/auth/signin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: identifier, password })
+                body: JSON.stringify(loginData)
             });
 
             const data = await response.json();
